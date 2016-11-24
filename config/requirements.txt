@@ -1,0 +1,7 @@
+Flask
+Flask-HTTPAuth
+Flask-RESTful
+flask-restful-swagger
+celery==3.1.25
+redis
+gunicorn

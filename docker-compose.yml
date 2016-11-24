@@ -1,0 +1,42 @@
+version: '2'
+
+services:
+
+  flansible:
+    image: playniuniu/flansible
+    ports:
+      - '8000:8000'
+    volumes:
+      - '~/vol/ansible:/data'
+    restart: always
+    depends_on:
+      - "celery"
+
+  celery:
+    image: playniuniu/flansible
+    command: /env/bin/celery worker -A flansible.celery --loglevel=info
+    volumes:
+      - '~/vol/ansible:/data'
+    restart: always
+    depends_on:
+      - "redis"
+
+  flower:
+    image: playniuniu/flower
+    ports:
+      - '5555:5555'
+    restart: always
+    depends_on:
+      - "redis"
+
+  redis:
+    image: 'redis:alpine'
+    command: redis-server --appendonly yes
+    volumes:
+      - 'redis:/data'
+    restart: always
+    ports:
+      - '6379:6379'
+
+volumes:
+  redis:
