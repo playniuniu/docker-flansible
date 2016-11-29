@@ -42,6 +42,7 @@ class AnsiblePlaybookModel:
         'verbose_level': fields.Integer,
         'become': fields.Boolean,
         'update_git_repo': fields.Boolean,
+        'limit': fields.String,
     }
 
 

@@ -45,6 +45,7 @@ class RunAnsiblePlaybook(Resource):
         parser.add_argument('verbose_level', type=int, help='verbose level, 1-4', required=False)
         parser.add_argument('become', type=bool, help='run with become', required=False)
         parser.add_argument('update_git_repo', type=bool, help='Set to true to update git repo prior to executing', required=False)
+        parser.add_argument('limit', type=str, help='limit playbook target', required=False)
         args = parser.parse_args()
 
         playbook_dir = args['playbook_dir']
@@ -53,6 +54,7 @@ class RunAnsiblePlaybook(Resource):
         inventory = args['inventory']
         extra_vars = args['extra_vars']
         do_update_git_repo = args['update_git_repo']
+        limit = args['limit']
 
         if do_update_git_repo is True:
             result = FlansibleGit.update_git_repo(playbook_dir)
@@ -97,7 +99,7 @@ class RunAnsiblePlaybook(Resource):
         extra_vars_string = ''
         if extra_vars:
             counter = 1
-            extra_vars_string += ' -e"'
+            extra_vars_string += ' -e "'
             for key in extra_vars.keys():
                 if counter < len(extra_vars):
                     spacer = " "
@@ -108,7 +110,12 @@ class RunAnsiblePlaybook(Resource):
                 counter += 1
             extra_vars_string += '"'
 
-        command = str.format("cd {0};ansible-playbook {1}{2}{3}{4}", playbook_dir, playbook, become_string, inventory, extra_vars_string)
+        if limit:
+            limit_str = ' --limit ' + limit
+        else:
+            limit_str = ''
+
+        command = str.format("cd {0}; ansible-playbook {1}{2}{3}{4}{5}", playbook_dir, playbook, become_string, inventory, extra_vars_string, limit_str)
         task_result = celery_runner.do_long_running_task.apply_async([command], soft=task_timeout, hard=task_timeout)
         result = {'task_id': task_result.id}
         return result
