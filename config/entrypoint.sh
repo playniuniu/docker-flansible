@@ -14,7 +14,7 @@ fi
 
 # prepare ansible
 if [ -d "/data/ansible/" ]; then
-    cp -r /data/ansible /etc/
+    ln -s /data/ansible /etc/ansible
 fi
 
 exec "$@"
