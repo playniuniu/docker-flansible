@@ -2,6 +2,7 @@
 import argparse
 import csv
 import json
+from collections import defaultdict
 
 
 class DynamicInventory(object):
@@ -23,29 +24,59 @@ class DynamicInventory(object):
 
         print(json.dumps(self.inventory))
 
-    # Example inventory for testing.
     def dynamic_inventory(self):
+        '''
+        CSV format is:
+
+        -----------------------
+        ip, user, passwd, group
+        -----------------------
+
+        Inventory format is:
+
+        -----------------------
+        'group1': { hosts: [ip1, ip2, ip3 ] },
+        'group2': { hosts: [ip4, ip5, ip6 ] },
+        '_meta': {
+            "hostvars": {
+                'ip1': {
+                    ansible_user = xxx
+                    ansible_ssh_pass = xxx
+                },
+                'ip2': {
+                    ansible_user = xxx
+                    ansible_ssh_pass = xxx
+                }
+            }
+        }
+        -----------------------
+        '''
 
         with open('/etc/ansible/hosts.csv', 'r') as csvfile:
             reader = csv.DictReader(csvfile)
-            csv_hosts = []
             csv_hostvar = {}
+            csv_group = defaultdict(list)
 
             for row in reader:
-                csv_hosts.append(row['ip'])
-                csv_hostvar[row['ip']] = {
+                # csv_hosts.append(row['ip'])
+                ip = row['ip']
+                group = row['group']
+
+                csv_hostvar[ip] = {
                     'ansible_user': row['user'],
                     'ansible_ssh_pass': row['passwd']
                 }
 
-            return {
-                'group': {
-                    'hosts': csv_hosts,
-                },
-                '_meta': {
-                    'hostvars': csv_hostvar
-                }
-            }
+                csv_group[group].append(row['ip'])
+
+            res = defaultdict(dict)
+
+            for key in csv_group:
+                res[key]['hosts'] = csv_group[key]
+
+            res['_meta'] = {'hostvars': csv_hostvar}
+
+            return res
 
     # Empty inventory for testing.
     def empty_inventory(self):
