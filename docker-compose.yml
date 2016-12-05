@@ -22,7 +22,7 @@ services:
       - "redis"
 
   flower:
-    image: playniuniu/flower:3.1.25
+    image: playniuniu/flower
     ports:
       - '5555:5555'
     restart: always
