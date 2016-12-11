@@ -2,7 +2,7 @@ FROM alpine:latest
 MAINTAINER playniuniu@gmail.com
 
 ENV C_FORCE_ROOT="true" \
-    INSTALL_PKG="python py-virtualenv git ansible openssh-client sshpass"
+    INSTALL_PKG="python py-virtualenv git ansible openssh-client sshpass rsync"
 
 COPY app /usr/src/app/
 COPY config /root/config/
